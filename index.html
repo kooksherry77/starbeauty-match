@@ -156,7 +156,11 @@
   #screen-result .wrap{max-width:1020px;margin:0 auto}
   #screen-result h2{font-size:clamp(28px,4vw,44px);font-weight:800;margin-bottom:8px}
   #screen-result h2 em{font-style:normal;color:var(--accent)}
-  .star-meta{color:var(--muted);font-size:13.5px;letter-spacing:.06em;margin-bottom:40px}
+  .star-meta{color:var(--muted);font-size:13.5px;letter-spacing:.06em;margin-bottom:14px}
+  .pool-switch{display:flex;gap:10px;margin:0 0 40px}
+  .pool-chip{background:transparent;border:1px solid var(--line);color:var(--muted);font:inherit;font-size:12.5px;padding:8px 18px;border-radius:999px;cursor:pointer;transition:.2s}
+  .pool-chip:hover{border-color:rgba(255,255,255,.3);color:var(--ink)}
+  .pool-chip.on{border-color:var(--accent);color:var(--accent);background:rgba(216,242,78,.08)}
   .duel{
     display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(18px,4vw,44px);
     align-items:center;
@@ -290,6 +294,10 @@
     <div class="eyebrow">Your Star Twin Report · 相似报告</div>
     <h2>你的明星脸是 <em id="rName">—</em></h2>
     <div class="star-meta" id="rMeta"></div>
+    <div class="pool-switch" id="poolSwitch">
+      <button class="pool-chip" data-pool="f">♀ 女明星</button>
+      <button class="pool-chip" data-pool="m">♂ 男明星</button>
+    </div>
 
     <div class="duel">
       <div class="face-card">
@@ -326,18 +334,18 @@
 
 <script>
 const STARS = [
-  {id:'hepburn',  cn:'奥黛丽·赫本',       en:'Audrey Hepburn',       region:'英国',     work:'《罗马假日》',   p:[.78,.62,.48,.30,.55,.80]},
-  {id:'monroe',   cn:'玛丽莲·梦露',       en:'Marilyn Monroe',       region:'美国',     work:'《七年之痒》',   p:[.85,.55,.55,.35,.50,.78]},
-  {id:'dicaprio', cn:'莱昂纳多·迪卡普里奥', en:'Leonardo DiCaprio',    region:'美国',     work:'《泰坦尼克号》', p:[.70,.68,.60,.42,.62,.75]},
-  {id:'bradpitt', cn:'布拉德·皮特',       en:'Brad Pitt',            region:'美国',     work:'《搏击俱乐部》', p:[.66,.72,.63,.45,.66,.74]},
-  {id:'jolie',    cn:'安吉丽娜·朱莉',     en:'Angelina Jolie',       region:'美国',     work:'《古墓丽影》',   p:[.60,.75,.58,.40,.70,.79]},
-  {id:'keanu',    cn:'基努·里维斯',       en:'Keanu Reeves',         region:'加拿大',   work:'《黑客帝国》',   p:[.42,.80,.52,.38,.74,.72]},
-  {id:'johansson',cn:'斯嘉丽·约翰逊',     en:'Scarlett Johansson',   region:'美国',     work:'《迷失东京》',   p:[.80,.60,.50,.36,.52,.77]},
-  {id:'hemsworth',cn:'克里斯·海姆斯沃斯', en:'Chris Hemsworth',      region:'澳大利亚', work:'《雷神》',       p:[.68,.74,.66,.48,.68,.73]},
-  {id:'gongli',   cn:'巩俐',             en:'Gong Li',              region:'中国',     work:'《红高粱》',     p:[.62,.66,.45,.33,.58,.81]},
-  {id:'kaneshiro',cn:'金城武',           en:'Takeshi Kaneshiro',    region:'中国台湾', work:'《重庆森林》',   p:[.50,.70,.49,.34,.60,.76]},
-  {id:'junjihyun',cn:'全智贤',           en:'Jun Ji-hyun',          region:'韩国',     work:'《我的野蛮女友》',p:[.74,.58,.42,.30,.50,.82]},
-  {id:'leeminho', cn:'李敏镐',           en:'Lee Min-ho',           region:'韩国',     work:'《继承者们》',   p:[.64,.62,.46,.32,.54,.78]},
+  {id:'hepburn',  cn:'奥黛丽·赫本',       en:'Audrey Hepburn',       region:'英国',     work:'《罗马假日》',   g:'f', p:[.78,.62,.48,.30,.55,.80]},
+  {id:'monroe',   cn:'玛丽莲·梦露',       en:'Marilyn Monroe',       region:'美国',     work:'《七年之痒》',   g:'f', p:[.85,.55,.55,.35,.50,.78]},
+  {id:'dicaprio', cn:'莱昂纳多·迪卡普里奥', en:'Leonardo DiCaprio',    region:'美国',     work:'《泰坦尼克号》', g:'m', p:[.70,.68,.60,.42,.62,.75]},
+  {id:'bradpitt', cn:'布拉德·皮特',       en:'Brad Pitt',            region:'美国',     work:'《搏击俱乐部》', g:'m', p:[.66,.72,.63,.45,.66,.74]},
+  {id:'jolie',    cn:'安吉丽娜·朱莉',     en:'Angelina Jolie',       region:'美国',     work:'《古墓丽影》',   g:'f', p:[.60,.75,.58,.40,.70,.79]},
+  {id:'keanu',    cn:'基努·里维斯',       en:'Keanu Reeves',         region:'加拿大',   work:'《黑客帝国》',   g:'m', p:[.42,.80,.52,.38,.74,.72]},
+  {id:'johansson',cn:'斯嘉丽·约翰逊',     en:'Scarlett Johansson',   region:'美国',     work:'《迷失东京》',   g:'f', p:[.80,.60,.50,.36,.52,.77]},
+  {id:'hemsworth',cn:'克里斯·海姆斯沃斯', en:'Chris Hemsworth',      region:'澳大利亚', work:'《雷神》',       g:'m', p:[.68,.74,.66,.48,.68,.73]},
+  {id:'gongli',   cn:'巩俐',             en:'Gong Li',              region:'中国',     work:'《红高粱》',     g:'f', p:[.62,.66,.45,.33,.58,.81]},
+  {id:'kaneshiro',cn:'金城武',           en:'Takeshi Kaneshiro',    region:'中国台湾', work:'《重庆森林》',   g:'m', p:[.50,.70,.49,.34,.60,.76]},
+  {id:'junjihyun',cn:'全智贤',           en:'Jun Ji-hyun',          region:'韩国',     work:'《我的野蛮女友》',g:'f', p:[.74,.58,.42,.30,.50,.82]},
+  {id:'leeminho', cn:'李敏镐',           en:'Lee Min-ho',           region:'韩国',     work:'《继承者们》',   g:'m', p:[.64,.62,.46,.32,.54,.78]},
 ];
 STARS.forEach(s => s.img = 'assets/stars/' + s.id + '.jpg');
 const DIMS = ['轮廓线条','五官比例','肤色色调','气质神态','光影风格'];
@@ -420,11 +428,17 @@ function analyze(img){
     ssat += mx ? (mx-mn)/mx : 0;
     if (i % 7 === 0){ h ^= d[i*4]; h = Math.imul(h, 0x01000193) >>> 0; h ^= d[i*4+2]; h = Math.imul(h, 0x01000193) >>> 0; }
   }
-  for (let y = 0; y < N; y++) for (let x = 0; x < N-1; x++) sedge += Math.abs(lum[y*N+x+1]-lum[y*N+x]);
+  let sideE = 0, centerE = 0;
+  for (let y = 0; y < N; y++) for (let x = 0; x < N-1; x++){
+    const e = Math.abs(lum[y*N+x+1]-lum[y*N+x]);
+    sedge += e;
+    if (x < N*.12 || x >= N*.88) sideE += e; else centerE += e;
+  }
   for (let x = 0; x < N; x++) for (let y = 0; y < N-1; y++) sedge += Math.abs(lum[(y+1)*N+x]-lum[y*N+x]);
   const n = N*N, m = sl/n;
   const clamp01 = v => Math.max(0, Math.min(1, v));
   const aspect = img.width >= img.height ? img.height/img.width : img.width/img.height;
+  const fem = clamp01(.38*clamp01(ssat/n) + .30*clamp01((sr/n - sb/n)/255 + .5) + .32*clamp01((sideE/(centerE+1))/1.2));
   return {
     f: [
       clamp01(m/255),                                  // brightness
@@ -434,7 +448,8 @@ function analyze(img){
       clamp01(sedge/(2*n)/48),                         // edge energy
       clamp01(aspect)                                  // aspect
     ],
-    hash: h >>> 0
+    hash: h >>> 0,
+    fem
   };
 }
 function mulberry32(a){
@@ -445,9 +460,9 @@ function mulberry32(a){
     return ((t ^ t >>> 14) >>> 0) / 4294967296;
   };
 }
-function match(feat){
+function match(feat, pool){
   const rng = mulberry32(feat.hash);
-  const scored = STARS.map(s => {
+  const scored = STARS.filter(s => s.g === pool).map(s => {
     let diff = 0;
     for (let i = 0; i < 6; i++) diff += Math.abs(feat.f[i] - s.p[i]);
     const affinity = 1 - diff / 6;
@@ -463,14 +478,16 @@ function match(feat){
 const PHASES = [
   [0,    '正在读取照片并定位面部区域…'],
   [900,  '提取轮廓、五官比例与肤色色调…'],
-  [2100, '遍历全球明星库 · 逐位比对典藏明星…'],
+  [2100, '遍历全球明星库 · 同性别分组逐位比对…'],
   [3500, '计算面部相似度向量…'],
   [4700, '锁定与你最相似的明星脸…']
 ];
 const TOTAL = 5800;
+let ctx = null;
 function startMatch(dataUrl, img){
   const feat = analyze(img);
-  const result = match(feat);
+  ctx = {dataUrl, feat, pool: feat.fem >= .5 ? 'f' : 'm'};
+  const result = match(feat, ctx.pool);
   show('loading');
   const pill = document.getElementById('loadPill');
   const text = document.getElementById('loadText');
@@ -485,17 +502,17 @@ function startMatch(dataUrl, img){
     for (const [tt, msg] of PHASES) if (t >= tt) cur = msg;
     text.textContent = cur;
     if (t < TOTAL) requestAnimationFrame(loop);
-    else renderResult(dataUrl, result);
+    else renderResult(result);
   })(t0);
 }
 
 /* ---------- result ---------- */
-function renderResult(dataUrl, result){
+function renderResult(result){
   const top = result.ranked[0].star;
   const score = Math.round(result.ranked[0].score * 10) / 10;
   document.getElementById('rName').textContent = '「' + top.cn + '」';
   document.getElementById('rMeta').textContent = top.en + ' · ' + top.region + ' · 代表作 ' + top.work;
-  document.getElementById('rUser').src = dataUrl;
+  document.getElementById('rUser').src = ctx.dataUrl;
   document.getElementById('rStar').src = top.img;
   document.getElementById('rStarCn').textContent = top.cn;
   document.getElementById('rStarEn').textContent = top.en + ' · Star Twin';
@@ -521,6 +538,7 @@ function renderResult(dataUrl, result){
     rowEl.appendChild(el);
   });
 
+  updatePoolChips();
   show('result');
   const C = 439.82;
   const fg = document.getElementById('ringFg');
@@ -538,6 +556,17 @@ function renderResult(dataUrl, result){
   })(t0);
   busy = false;
 }
+
+function updatePoolChips(){
+  document.querySelectorAll('#poolSwitch .pool-chip').forEach(b => b.classList.toggle('on', b.dataset.pool === ctx.pool));
+}
+document.querySelectorAll('#poolSwitch .pool-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!ctx || btn.dataset.pool === ctx.pool) return;
+    ctx.pool = btn.dataset.pool;
+    renderResult(match(ctx.feat, ctx.pool));
+  });
+});
 
 document.getElementById('retry').addEventListener('click', () => {
   fileInput.value = '';
